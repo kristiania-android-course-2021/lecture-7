@@ -2,6 +2,7 @@ package no.kristinia.myapplication
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -15,47 +16,34 @@ class MainActivity : AppCompatActivity() {
 
     val viewModel: MainViewModel by viewModels()
 
-    val score = MutableLiveData<Int>()
-    val scoreText = score.map { "score: $it" }
-    val message = score.map { score ->
-        when {
-            score == 10 -> "Gratulerer med 10"
-            else -> ""
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        scoreText.observe(this) { score ->
+        viewModel.score.observe(this) { score ->
             findViewById<TextView>(R.id.text).text = score.toString()
-        }
 
-        message.observe(this) { message ->
-            findViewById<TextView>(R.id.message).text = message
-        }
+            MainScope().launch {
+                val messageView = findViewById<TextView>(R.id.message)
+                val message = when {
+                    score == 10 -> "Gratulerer du har nådd 10 poeng"
+                    score == 1 -> "Takk for at du spiller!"
+                    else -> ""
+                }
+                if(message.isNotEmpty()){
+                    messageView.visibility = View.VISIBLE
+                    messageView.text = message
+                    delay(5000)
+                    messageView.visibility = View.GONE
+                }
+            }
 
-        coroutineScope.launch {
-            delay(1000)
-        }
 
-        GlobalScope.launch {
-
-        }
-
-        val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
-            println("Something went wrong ${exception.message}")
         }
 
         findViewById<Button>(R.id.button).setOnClickListener {
-            coroutineScope.launch(exceptionHandler + Dispatchers.IO) {
-                for (i in 1..10) {
-                    delay(1000)
-                    score.postValue(i)
-                }
-            }
+            viewModel.incrementScore()
         }
+
     }
 
     override fun onDestroy() {
