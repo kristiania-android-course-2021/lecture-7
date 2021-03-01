@@ -16,8 +16,6 @@ class MainViewModel: ViewModel() {
         }
     }
 
-    val messageVisible = MutableLiveData<Boolean>(false)
-
     fun incrementScore(){
         score.value = score.value!! +1
         //score.value?.inc()

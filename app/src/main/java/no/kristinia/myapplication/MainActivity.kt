@@ -21,22 +21,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         viewModel.score.observe(this) { score ->
             findViewById<TextView>(R.id.text).text = score.toString()
+        }
 
+        viewModel.message.observe(this) { message ->
             MainScope().launch {
-                val messageView = findViewById<TextView>(R.id.message)
-                val message = when {
-                    score == 10 -> "Gratulerer du har nådd 10 poeng"
-                    score == 1 -> "Takk for at du spiller!"
-                    else -> ""
-                }
-                if(message.isNotEmpty()){
-                    messageView.visibility = View.VISIBLE
-                    messageView.text = message
+                if (message.isNotEmpty()) {
+                    findViewById<TextView>(R.id.message).visibility = View.VISIBLE
+                    findViewById<TextView>(R.id.message).text = message
                     delay(5000)
-                    messageView.visibility = View.GONE
+                    findViewById<TextView>(R.id.message).visibility = View.GONE
                 }
             }
-
 
         }
 
