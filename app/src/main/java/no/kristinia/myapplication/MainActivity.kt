@@ -24,13 +24,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.message.observe(this) { message ->
-            MainScope().launch {
-                if (message.isNotEmpty()) {
-                    findViewById<TextView>(R.id.message).visibility = View.VISIBLE
-                    findViewById<TextView>(R.id.message).text = message
-                    delay(5000)
-                    findViewById<TextView>(R.id.message).visibility = View.GONE
-                }
+            // Non blocking, DENNE KJØRER PÅ EN ANNEN THREAD
+            MainScope().launch(Dispatchers.IO) {
+                for(i in 1..100000000) println(i)
+            }
+            //Blocking. DENNE KJØRER PÅ MAIN THREAD
+            MainScope().launch(Dispatchers.IO) {
+                val mydata = mySuspendFun()
+                println("")
             }
 
         }
@@ -39,6 +40,11 @@ class MainActivity : AppCompatActivity() {
             viewModel.incrementScore()
         }
 
+    }
+
+    suspend fun mySuspendFun(): Int{
+        delay(5000)
+        return 1
     }
 
     override fun onDestroy() {
